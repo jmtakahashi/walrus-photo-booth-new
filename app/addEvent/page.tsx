@@ -68,8 +68,23 @@ const timezones = [
   { value: '-03:00', name: '(GMT -3:00) Brazil, Buenos Aires, Georgetown' },
 ];
 // Then use this array to populate your select element
-const hours = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'] as const;
-const mins = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0')) as [string, ...string[]];
+const hours = [
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9',
+  '10',
+  '11',
+  '12',
+] as const;
+const mins = Array.from({ length: 60 }, (_, i) =>
+  i.toString().padStart(2, '0')
+) as [string, ...string[]];
 
 type FormData = {
   eventTitle: string;
@@ -129,6 +144,10 @@ const AddEvent: React.FC = () => {
   const [error, setError] = useState<Error | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const [isCheckingTitle, setIsCheckingTitle] = useState(false);
+  const [titleExists, setTitleExists] = useState(false);
+  const [submitButtonEnabled, setSubmitButtonEnabled] = useState(false);
+
   useEffect(() => {
     const fetchCurrentAdmin = async () => {
       setIsLoading(true);
@@ -158,17 +177,19 @@ const AddEvent: React.FC = () => {
   const now = new Date();
   const currentHour = now.getHours();
   const currentMinute = now.getMinutes();
-  
+
   let hourIn12 = currentHour % 12;
   hourIn12 = hourIn12 === 0 ? 12 : hourIn12;
   const ampm = currentHour >= 12 ? 'PM' : 'AM';
-  
+
   const minuteString = currentMinute.toString().padStart(2, '0');
 
   const getTimezoneOffset = () => {
     const offsetInMinutes = new Date().getTimezoneOffset();
     const offsetHours = Math.abs(offsetInMinutes / 60);
-    const formattedOffset = `${offsetInMinutes <= 0 ? '+' : '-'}${Math.floor(offsetHours)
+    const formattedOffset = `${offsetInMinutes <= 0 ? '+' : '-'}${Math.floor(
+      offsetHours
+    )
       .toString()
       .padStart(2, '0')}:00`;
     return formattedOffset;
@@ -187,12 +208,120 @@ const AddEvent: React.FC = () => {
     },
   });
 
+  const generateSlug = (title: string) => {
+    return title
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters except hyphen
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-'); // Replace multiple hyphens with single hyphen
+  };
+
+  // Watch the eventTitle field and update eventSlug
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'eventTitle') {
+        // Clear errors when user starts typing
+        setError(null);
+        setErrorMessage(null);
+        setTitleExists(false);
+        setIsCheckingTitle(true);
+
+        const slug = generateSlug(value.eventTitle || '');
+        form.setValue('eventSlug', slug);
+
+        // Check for existing event title
+        const checkEventTitle = async () => {
+          if (value.eventTitle) {
+            setIsCheckingTitle(true);
+            const { data: events, error } = await supabase
+              .from('events')
+              .select('event_title')
+              .eq('event_title', value.eventTitle.toLowerCase().trim())
+              .limit(1);
+
+            if (error) {
+              console.error('Error checking event title:', error);
+              return;
+            }
+
+            const exists = events.length > 0;
+            setTitleExists(exists);
+
+            // Check all form fields are filled and valid
+            const formValues = form.getValues();
+            const isFormComplete =
+              formValues.eventTitle &&
+              formValues.eventSlug &&
+              formValues.eventDate &&
+              formValues.eventTimeHour &&
+              formValues.eventTimeMin &&
+              formValues.eventTimeAMPM &&
+              formValues.eventTimezone;
+
+            const isFormValid = Boolean(
+              Object.keys(form.formState.errors).length === 0 &&
+                form.formState.isDirty &&
+                isFormComplete &&
+                !exists
+            );
+
+            setSubmitButtonEnabled(isFormValid);
+            setIsCheckingTitle(false);
+          } else {
+            setTitleExists(false);
+            setSubmitButtonEnabled(false);
+            setIsCheckingTitle(false);
+          }
+        };
+
+        // Debounce the database check to avoid too many requests
+        const timeoutId = setTimeout(checkEventTitle, 500);
+        return () => clearTimeout(timeoutId);
+      }
+
+      // Check form validity when any field changes
+      const formValues = form.getValues();
+      const isFormComplete = Boolean(
+        // Convert to boolean
+        formValues.eventTitle &&
+          formValues.eventSlug &&
+          formValues.eventDate &&
+          formValues.eventTimeHour &&
+          formValues.eventTimeMin &&
+          formValues.eventTimeAMPM &&
+          formValues.eventTimezone
+      );
+
+      const isFormValid = Boolean(
+        // Convert to boolean
+        Object.keys(form.formState.errors).length === 0 &&
+          form.formState.isDirty &&
+          isFormComplete &&
+          !titleExists
+      );
+
+      setSubmitButtonEnabled(isFormValid);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [form]);
+
   // 2. Define a submit handler.
   async function onSubmit(formData: z.infer<typeof EventSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
 
-    // setIsLoading(true);
+    // Prevent submission if title already exists
+    if (titleExists) {
+      setError(new Error('Duplicate title'));
+      setErrorMessage(
+        'Event title already taken, please enter a new event title.'
+      );
+      return;
+    }
+
+    setIsLoading(true);
 
     let hr;
 
@@ -215,6 +344,7 @@ const AddEvent: React.FC = () => {
 
     setError(null);
     setErrorMessage(null);
+    setTitleExists(false);
 
     const { data, error } = await supabase
       .from('events')
@@ -228,11 +358,20 @@ const AddEvent: React.FC = () => {
       ])
       .select();
 
+    setIsLoading(false);
+
     if (error) {
       setError(error);
-      // console.error('Error saving to database:', error);
+      // console.error('Error saving to database:', error.details);
       if (error.code === '23505') {
-        setErrorMessage('Slug already taken, please enter a new slug.');
+        if (error.details.includes('event_title'))
+          setErrorMessage(
+            'Event title already taken, please enter a new event title.'
+          );
+        if (error.details.includes('event_slug'))
+          setErrorMessage(
+            'Event slug already taken, please enter a new event slug.'
+          );
       } else {
         setErrorMessage(
           'There was an error saving your event, please reload the page and try again!'
@@ -245,7 +384,9 @@ const AddEvent: React.FC = () => {
     }
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_BASE_URL || '';
+  const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_BASE_URL || 'localhost:300';
+
+  console.log(baseUrl);
 
   if (isLoading) {
     return <Loading />;
@@ -279,18 +420,17 @@ const AddEvent: React.FC = () => {
       </div>
 
       <div className='w-full max-w-md m-auto mb-10'>
-        {error && <p className='text-red-500'>{errorMessage}</p>}
+        {error && <p className='text-red-500 mb-6'>{errorMessage}</p>}
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className='space-y-8'
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
             <FormField
               control={form.control}
               name='eventTitle'
               render={({ field }) => (
                 <FormItem className='flex flex-col'>
-                  <FormLabel>Event Title <span className="text-red-500">*</span></FormLabel>
+                  <FormLabel>
+                    Event Title <span className='text-red-500'>*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type='text'
@@ -298,6 +438,11 @@ const AddEvent: React.FC = () => {
                       {...field}
                     />
                   </FormControl>
+                  {titleExists && (
+                    <p className='text-sm text-red-500 mt-1'>
+                      An event with this title already exists
+                    </p>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
@@ -307,7 +452,9 @@ const AddEvent: React.FC = () => {
               name='eventSlug'
               render={({ field }) => (
                 <FormItem className='flex flex-col'>
-                  <FormLabel>Event Slug <span className="text-red-500">*</span></FormLabel>
+                  <FormLabel>
+                    Event Slug <span className='text-red-500'>*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type='text'
@@ -320,8 +467,10 @@ const AddEvent: React.FC = () => {
                       }}
                     />
                   </FormControl>
-                  <p className="text-[10px] text-muted-foreground mt-1">
-                    {form.getValues('eventSlug') ? `${baseUrl}/events/${form.getValues('eventSlug')}` : 'Enter a slug to see your event URL'}
+                  <p className='text-[10px] text-muted-foreground mt-1'>
+                    {form.getValues('eventSlug')
+                      ? `${baseUrl}/events/${form.getValues('eventSlug')}`
+                      : 'Enter a slug to see your event URL'}
                   </p>
                   <FormMessage />
                 </FormItem>
@@ -332,7 +481,9 @@ const AddEvent: React.FC = () => {
               name='eventDate'
               render={({ field }) => (
                 <FormItem className='flex flex-col'>
-                  <FormLabel>Event Date <span className="text-red-500">*</span></FormLabel>
+                  <FormLabel>
+                    Event Date <span className='text-red-500'>*</span>
+                  </FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -366,7 +517,9 @@ const AddEvent: React.FC = () => {
               )}
             />
             <FormItem>
-              <FormLabel>Event Time <span className="text-red-500">*</span></FormLabel>
+              <FormLabel>
+                Event Time <span className='text-red-500'>*</span>
+              </FormLabel>
               <div className='flex flex-col md:flex-row gap-2 border p-2 rounded-md'>
                 <FormField
                   control={form.control}
@@ -455,7 +608,9 @@ const AddEvent: React.FC = () => {
               name='eventTimezone'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Timezone <span className="text-red-500">*</span></FormLabel>
+                  <FormLabel>
+                    Timezone <span className='text-red-500'>*</span>
+                  </FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -478,7 +633,13 @@ const AddEvent: React.FC = () => {
               )}
             />
 
-            <Button type='submit' className='w-full'>Create Event</Button>
+            <Button
+              type='submit'
+              className='w-full'
+              disabled={!submitButtonEnabled || isCheckingTitle}
+            >
+              Create Event
+            </Button>
           </form>
         </Form>
       </div>
