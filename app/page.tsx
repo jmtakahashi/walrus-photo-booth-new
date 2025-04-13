@@ -34,19 +34,21 @@ const HomePage: React.FC = () => {
     const fetchEvents = async () => {
       setIsLoading(true);
 
-      const { data: events, error } = await supabase
-        .from('events')
-        .select('*')
-        .order('event_date', { ascending: false });
+      try {
+        const { data: events, error } = await supabase
+          .from('events')
+          .select('*')
+          .order('event_date', { ascending: false });
 
-      if (error) {
-        setError(error);
-        console.error('Error fetching events:', error);
-      } else {
+        if (error) throw error;
+
         setEvents((events as Event[]) || []);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+        setError(error as Error);
+      } finally {
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     };
 
     fetchEvents();
@@ -56,19 +58,21 @@ const HomePage: React.FC = () => {
     const fetchCurrentAdmin = async () => {
       setIsLoading(true);
 
-      const { data: admins, error } = await supabase
-        .from('admins')
-        .select('id')
-        .eq('email', emailAddress);
+      try {
+        const { data: admins, error } = await supabase
+          .from('admins')
+          .select('id')
+          .eq('email', emailAddress);
 
-      if (error) {
-        setError(error);
-        console.error('Error fetching current admin:', error);
-      } else {
+        if (error) throw error;
+
         if (admins.length > 0) setCurrentAdminId(admins[0].id);
+      } catch (error) {
+        console.error('Error fetching current admin:', error);
+        setError(error as Error);
+      } finally {
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     };
 
     fetchCurrentAdmin();
@@ -102,10 +106,6 @@ const HomePage: React.FC = () => {
       setIsLoading(false);
     }
   };
-
-  if (error) {
-    return <div>Error loading events</div>;
-  }
 
   if (isLoading) {
     return <Loading />;
@@ -144,15 +144,16 @@ const HomePage: React.FC = () => {
       </div>
 
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-        {events.map((event) => (
-          <EventCard
-            key={event.id}
-            event={event}
-            isConnected={isConnected}
-            currentAdminId={currentAdminId}
-            onDelete={handleDeleteEvent}
-          />
-        ))}
+        {error &&
+          events.map((event) => (
+            <EventCard
+              key={event.id}
+              event={event}
+              isConnected={isConnected}
+              currentAdminId={currentAdminId}
+              onDelete={handleDeleteEvent}
+            />
+          ))}
       </div>
     </main>
   );
