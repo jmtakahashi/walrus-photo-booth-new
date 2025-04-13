@@ -143,9 +143,13 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-        {error &&
-          events.map((event) => (
+      {error ? (
+        <div className='grid grid-cols-1 p-6 text-center'>
+          <h2>Oops! There was an error fetching events. Please try again!</h2>
+        </div>
+      ) : (
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+          {events.map((event) => (
             <EventCard
               key={event.id}
               event={event}
@@ -154,7 +158,8 @@ const HomePage: React.FC = () => {
               onDelete={handleDeleteEvent}
             />
           ))}
-      </div>
+        </div>
+      )}
     </main>
   );
 };
