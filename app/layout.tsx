@@ -6,14 +6,24 @@ import { Analytics } from '@vercel/analytics/react';
 import { ProvidersAndLayout } from './ProvidersAndLayout';
 
 const geistSans = localFont({
-  src: './fonts/GeistVF.woff',
+  src: [
+    {
+      path: '../public/fonts/GeistVF.woff',
+      weight: '100, 900',
+      style: 'normal',
+    },
+  ],
   variable: '--font-geist-sans',
-  weight: '100 900',
 });
 const geistMono = localFont({
-  src: './fonts/GeistMonoVF.woff',
+  src: [
+    {
+      path: '../public/fonts/GeistMonoVF.woff',
+      weight: '100, 900',
+      style: 'mono',
+    },
+  ],
   variable: '--font-geist-mono',
-  weight: '100 900',
 });
 
 const mondwest = localFont({
