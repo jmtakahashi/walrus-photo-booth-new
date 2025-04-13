@@ -8,8 +8,8 @@ import { ProvidersAndLayout } from './ProvidersAndLayout';
 const geistSans = localFont({
   src: [
     {
-      path: '..public/fonts/GeistVF.woff',
-      weight: '100 900',
+      path: '../public/fonts/GeistVF.woff',
+      weight: '100, 900',
       style: 'normal',
     },
   ],
@@ -19,8 +19,8 @@ const geistMono = localFont({
   src: [
     {
       path: '../public/fonts/GeistMonoVF.woff',
-      weight: '100 900',
-      style: 'normal',
+      weight: '100, 900',
+      style: 'mono',
     },
   ],
   variable: '--font-geist-mono',
