@@ -74,3 +74,11 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+:root {
+  --walrus-black: #0c0f1d;
+  --walrus-navy: #161826;
+  --walrus-grey: #878a9d;
+  --walrus-teal: #97f0e5;
+  --walrus-light-grey: #dddee4;
+}
