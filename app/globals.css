@@ -2,14 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-.site-title {
-  font-family: var(--font-mondwest-reg);
-}
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -73,4 +65,54 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+:root {
+  --walrus-black: #0c0f1d;
+  --walrus-navy: #161826;
+  --walrus-grey: #878a9d;
+  --walrus-teal: #97f0e5;
+  --walrus-light-grey: #dddee4;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.site-title {
+  font-family: var(--font-mondwest-reg);
+}
+
+/* utility color rules - background */
+.bg-walrus-black {
+  background: var(--walrus-black);
+}
+.bg-walrus-navy {
+  background: var(--walrus-navy);
+}
+.bg-walrus-grey {
+  background: var(--walrus-grey);
+}
+.bg-walrus-teal {
+  background: var(--walrus-teal);
+}
+.bg-walrus-light-grey {
+  background: var(--walrus-light-grey);
+}
+
+/* utility color rules - text */
+.text-walrus-black {
+  color: var(--walrus-black);
+}
+.text-walrus-navy {
+  color: var(--walrus-black);
+}
+.text-walrus-grey {
+  color: var(--walrus-grey);
+}
+.text-walrus-teal {
+  color: var(--walrus-teal);
+}
+.text-walrus-light-grey {
+  color: var(--walrus-light-grey);
 }

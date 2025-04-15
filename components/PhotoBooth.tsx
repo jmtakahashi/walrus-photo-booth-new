@@ -207,24 +207,27 @@ const PhotoBooth: React.FC<Props> = ({
 
       if (result?.data?.newlyCreated?.blobObject) {
         // save to supabase
-        const { data, error } = await supabase.from('photos').insert([
-          {
-            blob_id: result.data.newlyCreated.blobObject.blobId,
-            object_id: result.data.newlyCreated.blobObject.id,
-            created_at: new Date().toISOString(),
-            event_id: selectedEventId,
-          },
-        ]).select();
+        const { data, error } = await supabase
+          .from('photos')
+          .insert([
+            {
+              blob_id: result.data.newlyCreated.blobObject.blobId,
+              object_id: result.data.newlyCreated.blobObject.id,
+              created_at: new Date().toISOString(),
+              event_id: selectedEventId,
+            },
+          ])
+          .select();
 
         if (error) {
           console.error('Error saving to Supabase:', error);
           throw new Error('Failed to save to database');
         }
-        
+
         if (data && data.length > 0) {
           setPhotoId(data[0].blob_id);
         }
-        
+
         setIsUploaded(true);
       } else {
         console.error('Unexpected response structure:', result);
@@ -237,7 +240,9 @@ const PhotoBooth: React.FC<Props> = ({
     }
   };
 
-  const qrCodeValue = photoId ? `${baseUrl}/events/${selectedEventSlug}?photoId=${photoId}` : eventUrl;
+  const qrCodeValue = photoId
+    ? `${baseUrl}/events/${selectedEventSlug}?photoId=${photoId}`
+    : eventUrl;
 
   return (
     <>
@@ -247,8 +252,7 @@ const PhotoBooth: React.FC<Props> = ({
             {!isCameraOn && (
               <Button
                 onClick={startCamera}
-                variant='default'
-                className='min-w-[140px] transition-all duration-200 hover:scale-105'
+                className='min-w-[140px] bg-walrus-teal text-walrus-black'
               >
                 <Camera className='mr-2 h-5 w-5' />
                 Start Camera
@@ -257,8 +261,7 @@ const PhotoBooth: React.FC<Props> = ({
             <Button
               onClick={takePhotoSequence}
               disabled={!isCameraOn || isCapturing}
-              variant='secondary'
-              className='min-w-[140px] transition-all duration-200 hover:scale-105'
+              className='min-w-[140px] bg-walrus-teal text-walrus-black'
             >
               <Camera className='mr-2 h-5 w-5' />
               {isCapturing ? 'Capturing...' : 'Take Photos'}
@@ -288,7 +291,7 @@ const PhotoBooth: React.FC<Props> = ({
           </div>
           <canvas ref={canvasRef} className='hidden' />
         </div>
-        <div className='bg-black/80 backdrop-blur-sm text-white text-center py-3 text-base font-medium tracking-wider border-t border-zinc-700'>
+        <div className='bg-black/80 backdrop-blur-sm text-walrus-teal text-center py-3 text-base font-sm tracking-wider border-t border-zinc-700'>
           Sui Presents Walrus
         </div>
       </div>

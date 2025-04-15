@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import Link from 'next/link'
+import Link from 'next/link';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
@@ -117,9 +117,9 @@ const PhotoBoothPage: React.FC = () => {
         <div className='min-h-screen w-full flex flex-col items-center justify-center p-4 gap-4'>
           <h2 className='text-xl font-semibold'>No Events Found</h2>
           <p>You haven&apos;t created any events yet.</p>
-          <a 
-            href="/addEvent" 
-            className='px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors'
+          <a
+            href='/addEvent'
+            className='px-4 py-2 rounded-md bg-walrus-teal text-walrus-black'
           >
             Create Your First Event
           </a>
@@ -177,11 +177,11 @@ const PhotoBoothPage: React.FC = () => {
         </div>
       </main>
       <footer className='w-full py-4 text-center'>
-        <Link 
-          href="/terms-of-use" 
-          className='text-blue-600 hover:underline'
-          target="_blank" 
-          rel="noopener noreferrer"
+        <Link
+          href='/terms-of-use'
+          className='hover:underline'
+          target='_blank'
+          rel='noopener noreferrer'
         >
           Terms of Use
         </Link>
