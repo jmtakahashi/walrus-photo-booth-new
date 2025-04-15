@@ -410,7 +410,7 @@ const AddEvent: React.FC = () => {
           {isConnected && (
             <Link
               href='/'
-              className='flex items-center justify-center rounded-md text-sm text-white bg-gray-500 py-2 px-6'
+              className='flex items-center justify-center rounded-md text-sm py-2 px-6 bg-walrus-black text-white'
             >
               Return Home
             </Link>
@@ -635,7 +635,7 @@ const AddEvent: React.FC = () => {
 
             <Button
               type='submit'
-              className='w-full'
+              className='w-full bg-walrus-teal text-walrus-black'
               disabled={!submitButtonEnabled || isCheckingTitle}
             >
               Create Event
