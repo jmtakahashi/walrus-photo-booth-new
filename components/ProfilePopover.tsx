@@ -81,7 +81,8 @@ export default function ProfilePopover() {
 
   return (
     <Button
-      variant={'secondary'}
+      // variant={'secondary'}
+      className='bg-walrus-teal text-walrus-black hover:text-white'
       onClick={() => {
         redirectToAuthUrl();
       }}
