@@ -179,7 +179,7 @@ const PhotoBoothPage: React.FC = () => {
       <footer className='w-full py-4 text-center'>
         <Link
           href='/terms-of-use'
-          className='text-blue-600 hover:underline'
+          className='hover:underline'
           target='_blank'
           rel='noopener noreferrer'
         >
