@@ -32,7 +32,9 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const AGGREGATOR_URL = process.env.NEXT_PUBLIC_AGGREGATOR_URL || 'https://aggregator.walrus-testnet.walrus.space';
+const AGGREGATOR_URL =
+  process.env.NEXT_PUBLIC_AGGREGATOR_URL ||
+  'https://aggregator.walrus-testnet.walrus.space';
 
 interface Photo {
   id: number;
@@ -210,10 +212,7 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
             <h2 className='text-lg text-gray-600 dark:text-gray-300'>
               {eventDetails?.event_date}
             </h2>
-            <Link
-              href='/'
-              className='inline-block text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition-colors'
-            >
+            <Link href='/' className='inline-block transition-colors'>
               ← Back to Events
             </Link>
           </div>
@@ -223,13 +222,13 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
               <>
                 <Link
                   href='/addEvent'
-                  className='flex items-center justify-center rounded-lg text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-colors py-2.5 px-6'
+                  className='flex items-center justify-center rounded-lg text-sm font-medium py-2.5 px-6 bg-walrus-black text-walrus-teal transition-colors '
                 >
-                  + Event
+                  Add Event
                 </Link>
                 <Link
                   href='/photo-booth'
-                  className='flex items-center justify-center rounded-lg text-sm font-medium text-gray-900 bg-gray-100 hover:bg-gray-200 transition-colors py-2.5 px-6'
+                  className='flex items-center justify-center rounded-lg text-sm font-medium py-2.5 px-6 bg-walrus-teal text-walrus-black transition-colors'
                 >
                   Photo Booth
                 </Link>
@@ -265,9 +264,14 @@ const PhotosPage = ({ params }: { params: Promise<{ eventSlug: string }> }) => {
                                 transition-all duration-300 rounded-lg'
                   />
 
-                  <Dialog open={selectedPhotoId === photo.blob_id} onOpenChange={(isOpen) => setSelectedPhotoId(isOpen ? photo.blob_id : null)}>
+                  <Dialog
+                    open={selectedPhotoId === photo.blob_id}
+                    onOpenChange={(isOpen) =>
+                      setSelectedPhotoId(isOpen ? photo.blob_id : null)
+                    }
+                  >
                     <DialogTrigger asChild>
-                      <div 
+                      <div
                         className='relative w-[80%] h-full cursor-pointer z-10'
                         onClick={() => setSelectedPhotoId(photo.blob_id)}
                       >
