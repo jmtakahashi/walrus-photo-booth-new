@@ -10,6 +10,14 @@ body {
   font-family: var(--font-mondwest-reg);
 }
 
+:root {
+  --walrus-black: #0c0f1d;
+  --walrus-navy: #161826;
+  --walrus-grey: #878a9d;
+  --walrus-teal: #97f0e5;
+  --walrus-light-grey: #dddee4;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -75,10 +83,9 @@ body {
   }
 }
 
-:root {
-  --walrus-black: #0c0f1d;
-  --walrus-navy: #161826;
-  --walrus-grey: #878a9d;
-  --walrus-teal: #97f0e5;
-  --walrus-light-grey: #dddee4;
+.bg-walrus-teal {
+  background: var(--walrus-teal);
+}
+.text-walrus-black {
+  color: var(--walrus-black);
 }
